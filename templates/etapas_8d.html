@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% set etapas = ["Contenção", "Causa Raiz", "Ação Corretiva", "Poka Yoke", "LPA", "Validação", "Trab. Padronizado", "FMEA", "Plano de Controle", "Lições Aprendidas", "8D Fechado"] %}
+{% block title %}Etapas 8D · Sistema PDCA / 8D{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Etapas 8D</h1>
+  <p class="subtitle">Prazo e data de realização de cada etapa, por reclamação. Preencha a Realização diretamente na tabela.</p>
+</div>
+
+<div class="toolbar">
+  <input type="search" id="busca-etapas" placeholder="Buscar por ID MRHB, cliente, descrição..." />
+  <span id="contador-etapas" class="contador"></span>
+</div>
+
+<div class="table-wrap card">
+  <table class="tabela-etapas-8d">
+    <thead>
+      <tr>
+        <th rowspan="2">ID MRHB</th>
+        <th rowspan="2">Cliente</th>
+        <th rowspan="2">Descrição do Defeito</th>
+        <th rowspan="2">Data Abertura</th>
+        <th rowspan="2">Progresso</th>
+        <th rowspan="2">Status</th>
+        {% for etapa in etapas %}
+        <th colspan="2" class="etapa-grupo">{{ etapa }}</th>
+        {% endfor %}
+      </tr>
+      <tr>
+        {% for etapa in etapas %}
+        <th class="etapa-sub grupo-inicio">Prazo</th>
+        <th class="etapa-sub">Realização</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody id="tabela-etapas-corpo">
+      <tr><td colspan="28" class="loading">Carregando...</td></tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='etapas_8d.js') }}"></script>
+{% endblock %}

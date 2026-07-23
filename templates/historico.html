@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% from "_form_campos.html" import campos_reclamacao %}
+{% block title %}Gerenciador · Sistema PDCA / 8D{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Gerenciador de Reclamações</h1>
+  <p class="subtitle">Banco de dados com todas as reclamações cadastradas. Clique no ▾ de uma coluna para filtrar (como no Excel) e arraste o cabeçalho para reordenar.</p>
+</div>
+
+<div class="toolbar">
+  <button type="button" id="btn-limpar-filtros" class="btn btn-secondary btn-small">Limpar filtros</button>
+  <span id="contador" class="contador"></span>
+</div>
+
+<div class="table-wrap card">
+  <table id="tabela-historico">
+    <thead id="tabela-cabecalho"></thead>
+    <tbody id="tabela-corpo">
+      <tr><td colspan="12" class="loading">Carregando...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div id="filtro-popover" class="filtro-popover" hidden>
+  <div class="filtro-popover-busca">
+    <input type="text" id="filtro-popover-busca-input" placeholder="Buscar valor..." />
+  </div>
+  <label class="filtro-popover-item filtro-popover-todos">
+    <input type="checkbox" id="filtro-popover-todos" />
+    <span>(Selecionar tudo)</span>
+  </label>
+  <div id="filtro-popover-lista" class="filtro-popover-lista"></div>
+  <div class="filtro-popover-acoes">
+    <button type="button" id="filtro-popover-limpar" class="btn btn-secondary btn-small">Limpar</button>
+    <button type="button" id="filtro-popover-ok" class="btn btn-primary btn-small">OK</button>
+  </div>
+</div>
+
+<div id="modal-editar" class="modal-overlay" hidden>
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2>Editar Reclamação</h2>
+      <button type="button" id="modal-fechar" class="modal-close" aria-label="Fechar">&times;</button>
+    </div>
+    <div id="modal-alert" class="alert" hidden></div>
+    <form id="form-editar" class="form-grid modal-form-grid" autocomplete="off">
+      <input type="hidden" id="edit_registro_id" />
+      <div class="field">
+        <label for="edit_id_mrhb">ID MRHB <span class="req">*</span></label>
+        <input type="text" id="edit_id_mrhb" name="id_mrhb" required />
+      </div>
+      {{ campos_reclamacao("edit_") }}
+      <div class="form-actions">
+        <button type="button" id="modal-cancelar" class="btn btn-secondary">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modal-excluir" class="modal-overlay" hidden>
+  <div class="modal-card modal-card-pequeno">
+    <div class="modal-header">
+      <h2>Excluir Reclamação</h2>
+      <button type="button" id="excluir-modal-fechar" class="modal-close" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="modal-form-grid">
+      <div class="alert error">
+        ⚠️ Você está prestes a excluir a reclamação <strong id="excluir-id-mrhb"></strong>. Esta ação <strong>não pode ser desfeita</strong>.
+      </div>
+      <div id="excluir-alert" class="alert error" hidden></div>
+      <form id="form-excluir" autocomplete="off">
+        <div class="field">
+          <label for="excluir-motivo">Motivo da exclusão <span class="req">*</span></label>
+          <textarea id="excluir-motivo" rows="3" required placeholder="Explique por que essa reclamação está sendo excluída..."></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="excluir-cancelar" class="btn btn-secondary">Cancelar</button>
+          <button type="submit" class="btn btn-perigo">Excluir Definitivamente</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='historico.js') }}"></script>
+{% endblock %}

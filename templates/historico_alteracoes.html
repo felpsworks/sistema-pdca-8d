@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Histórico de Alterações · Sistema PDCA / 8D{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Histórico de Alterações</h1>
+  <p class="subtitle">Registro de todas as edições e exclusões feitas na aba Histórico.</p>
+</div>
+
+<div class="toolbar">
+  <input type="search" id="busca-auditoria" placeholder="Buscar por ID MRHB, campo, valor, motivo..." />
+  <span id="contador-auditoria" class="contador"></span>
+</div>
+
+<div class="table-wrap card">
+  <table>
+    <thead>
+      <tr>
+        <th>Data/Hora</th>
+        <th>ID MRHB</th>
+        <th>Ação</th>
+        <th>Campo</th>
+        <th>Valor Anterior</th>
+        <th>Valor Novo</th>
+        <th>Motivo</th>
+      </tr>
+    </thead>
+    <tbody id="tabela-auditoria-corpo">
+      <tr><td colspan="7" class="loading">Carregando...</td></tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='historico_alteracoes.js') }}"></script>
+{% endblock %}

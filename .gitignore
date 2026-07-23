@@ -1,0 +1,14 @@
+# Ambiente Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Banco de dados (contém dados reais de clientes — não deve ir para o Git)
+data/*.db
+
+# Editor / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

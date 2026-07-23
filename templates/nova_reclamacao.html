@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "_form_campos.html" import campos_reclamacao %}
+{% block title %}Nova Reclamação · Sistema PDCA / 8D{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Nova Reclamação</h1>
+  <p class="subtitle">Cadastre uma nova reclamação de cliente para abrir o fluxo PDCA / 8D. Ao concluir um campo, o próximo é focado automaticamente.</p>
+</div>
+
+<div id="alert" class="alert" hidden></div>
+
+<form id="form-reclamacao" class="card form-grid" autocomplete="off">
+  {{ campos_reclamacao("") }}
+  <div class="form-actions">
+    <button type="button" id="btn-limpar" class="btn btn-secondary">Limpar Formulário</button>
+    <button type="submit" class="btn btn-primary">Cadastrar Reclamação</button>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+{% endblock %}
