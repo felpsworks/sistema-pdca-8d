@@ -1,7 +1,12 @@
 """Importa o historico real de prazos/realizacoes da aba ETAPAS 8D do Excel
 original, casando cada linha pelo ID MRHB com as reclamacoes ja importadas
-(seed_reclamacoes.py). Sobrescreve os prazos gerados automaticamente pelos
-valores reais do Excel e preenche a data de realizacao onde ja existir.
+(seed_reclamacoes.py).
+
+So preenche reclamacoes que AINDA NAO TEM nenhuma etapa registrada no banco
+(normalmente as recem-importadas por seed_reclamacoes.py). Reclamacoes que ja
+tem progresso lancado direto no sistema web (pela pagina Etapas 8D) sao
+puladas de proposito - rodar este script de novo NUNCA sobrescreve prazo ou
+realizacao ja preenchidos pelo uso real do sistema.
 
 Uso: python seed_etapas.py "C:\\caminho\\para\\GERENCIADOR_PDCA_2026.xlsm"
 """
@@ -51,8 +56,12 @@ def seed(source_path: str):
         row["id_mrhb"]: row["id"]
         for row in conn.execute("SELECT id, id_mrhb FROM reclamacoes").fetchall()
     }
+    ja_tem_etapas = {
+        row["reclamacao_id"] for row in conn.execute("SELECT DISTINCT reclamacao_id FROM etapas_8d").fetchall()
+    }
 
-    atualizadas = 0
+    novas = 0
+    puladas_ja_tem_progresso = 0
     sem_correspondencia = 0
 
     for r in range(3, ws.max_row + 1):
@@ -66,6 +75,10 @@ def seed(source_path: str):
             sem_correspondencia += 1
             continue
 
+        if reclamacao_id in ja_tem_etapas:
+            puladas_ja_tem_progresso += 1
+            continue
+
         for ordem, ((nome, _dias), (col_prazo, col_realizacao)) in enumerate(
             zip(ETAPAS_8D, COLUNAS_ETAPAS), start=1
         ):
@@ -73,20 +86,18 @@ def seed(source_path: str):
             realizacao = texto_data(ws.cell(row=r, column=col_realizacao).value)
 
             conn.execute(
-                """
-                INSERT INTO etapas_8d (reclamacao_id, etapa, ordem, prazo, realizacao)
-                VALUES (?, ?, ?, ?, ?)
-                ON CONFLICT(reclamacao_id, etapa) DO UPDATE SET
-                    prazo = excluded.prazo,
-                    realizacao = excluded.realizacao
-                """,
+                "INSERT INTO etapas_8d (reclamacao_id, etapa, ordem, prazo, realizacao) VALUES (?, ?, ?, ?, ?)",
                 (reclamacao_id, nome, ordem, prazo, realizacao),
             )
-        atualizadas += 1
+        novas += 1
 
     conn.commit()
     conn.close()
-    print(f"Reclamações com etapas atualizadas: {atualizadas}. Sem correspondência no banco: {sem_correspondencia}.")
+    print(
+        f"Reclamações novas com etapas importadas: {novas}. "
+        f"Puladas (já tinham progresso no sistema): {puladas_ja_tem_progresso}. "
+        f"Sem correspondência no banco: {sem_correspondencia}."
+    )
 
 
 if __name__ == "__main__":
