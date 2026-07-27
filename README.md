@@ -23,6 +23,11 @@ departamento de TI antes de uma implantação definitiva na empresa.
 - **Histórico de Alterações** — auditoria de tudo que foi editado ou
   excluído no Gerenciador (campo alterado, valor anterior/novo, motivo da
   exclusão).
+- **Administrador** (`/admin`, protegido por senha) — gerencia a Lista de
+  Peças (PN) e os Clientes, além das opções que aparecem nos menus do
+  formulário de Nova Reclamação (Tipo PDCA, Área Responsável 8D, Tipo
+  Problema, Tipo de Reclamação, MQ IN, MQ US). Adicionar/excluir um item
+  aqui reflete imediatamente no formulário, sem precisar editar código.
 
 ## Pré-requisitos
 
@@ -49,8 +54,9 @@ por exemplo `http://192.168.1.50:5000` (veja o IP com `ipconfig`).
 > - Rodar com `debug=False` e por trás de um servidor WSGI de produção
 >   (ex.: `waitress`, `gunicorn`), em vez do servidor de desenvolvimento do
 >   Flask usado hoje.
-> - Adicionar autenticação — hoje o app não tem login, qualquer pessoa com
->   acesso à rede pode ver, editar e excluir reclamações.
+> - Adicionar autenticação — hoje só a área `/admin` tem senha (fixa no
+>   código, em `app.py`); o restante do app não tem login, qualquer pessoa
+>   com acesso à rede pode ver, editar e excluir reclamações.
 > - Rotina de backup do arquivo `data/app.db`.
 
 ## Estrutura do projeto

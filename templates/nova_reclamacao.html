@@ -10,7 +10,8 @@
 <div id="alert" class="alert" hidden></div>
 
 <form id="form-reclamacao" class="card form-grid" autocomplete="off">
-  {{ campos_reclamacao("") }}
+  <p class="form-legenda field-wide"><span class="req">*</span> Campo obrigatório</p>
+  {{ campos_reclamacao("", opcoes) }}
   <div class="form-actions">
     <button type="button" id="btn-limpar" class="btn btn-secondary">Limpar Formulário</button>
     <button type="submit" class="btn btn-primary">Cadastrar Reclamação</button>

@@ -259,7 +259,21 @@ function alternarPopover(campo, botao) {
   abrirPopoverFiltro(campo, botao);
 }
 
-popoverBusca.addEventListener("input", renderizarListaPopover);
+popoverBusca.addEventListener("input", () => {
+  // Igual ao AutoFiltro do Excel: digitar na busca já marca só os valores
+  // encontrados (limpar a busca volta a refletir o filtro já aplicado).
+  const termo = popoverBusca.value.trim().toLowerCase();
+  const todasOpcoes = valoresUnicosDaColuna(colunaAtivaPopover);
+  if (termo) {
+    selecaoTemporaria = new Set(
+      todasOpcoes.filter((o) => o.rotulo.toLowerCase().includes(termo)).map((o) => o.chave)
+    );
+  } else {
+    const excluidos = filtrosColuna[colunaAtivaPopover] || new Set();
+    selecaoTemporaria = new Set(todasOpcoes.filter((o) => !excluidos.has(o.chave)).map((o) => o.chave));
+  }
+  renderizarListaPopover();
+});
 
 popoverLista.addEventListener("change", (ev) => {
   const input = ev.target.closest('input[type="checkbox"]');

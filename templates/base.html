@@ -11,10 +11,12 @@
     <div class="topbar-inner">
       <span class="brand">Gerenciador PDCA <span class="brand-accent">/ 8D</span></span>
       <nav class="nav">
+        <a href="{{ url_for('dashboard') }}" class="{{ 'active' if active == 'dashboard' else '' }}">Dashboard</a>
         <a href="{{ url_for('nova_reclamacao') }}" class="{{ 'active' if active == 'nova' else '' }}">Nova Reclamação</a>
         <a href="{{ url_for('historico') }}" class="{{ 'active' if active == 'historico' else '' }}">Gerenciador</a>
         <a href="{{ url_for('etapas_8d_page') }}" class="{{ 'active' if active == 'etapas' else '' }}">Etapas 8D</a>
         <a href="{{ url_for('historico_alteracoes') }}" class="{{ 'active' if active == 'auditoria' else '' }}">Histórico de Alterações</a>
+        <a href="{{ url_for('admin_painel') }}" class="{{ 'active' if active == 'admin' else '' }}">Administrador</a>
       </nav>
     </div>
   </header>

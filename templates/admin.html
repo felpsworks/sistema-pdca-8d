@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Administrador · Sistema PDCA / 8D{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Área do Administrador</h1>
+  <p class="subtitle">Gerencie os clientes, as peças (PN) e as opções que aparecem nos menus do formulário de Nova Reclamação.</p>
+</div>
+
+<div class="toolbar">
+  <span class="contador">As alterações aqui refletem imediatamente no formulário de Nova Reclamação.</span>
+  <a href="{{ url_for('admin_logout') }}" class="btn btn-secondary btn-small">Sair da área administrador</a>
+</div>
+
+<div id="admin-alert" class="alert" hidden></div>
+
+<h2 class="admin-secao-titulo">Clientes</h2>
+<div class="card admin-lista-card">
+  <form class="admin-lista-form" data-form-clientes>
+    <input type="text" placeholder="Nome do cliente (ex: EATON)" required />
+    <button type="submit" class="btn btn-primary btn-small">Adicionar</button>
+  </form>
+  <ul class="admin-lista-itens" data-lista-clientes>
+    {% for c in clientes %}
+    <li class="admin-lista-item" data-id="{{ c.id }}">
+      <span>{{ c.nome }}</span>
+      <button type="button" class="btn-excluir" data-excluir-cliente="{{ c.id }}">Excluir</button>
+    </li>
+    {% else %}
+    <li class="admin-lista-vazio">Nenhum cliente cadastrado.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<h2 class="admin-secao-titulo">Opções do formulário</h2>
+<div class="admin-grid">
+  {% for categoria, dados in opcoes.items() %}
+  <div class="card admin-lista-card">
+    <h3>{{ dados.rotulo }}</h3>
+    <form class="admin-lista-form" data-form-opcao="{{ categoria }}">
+      <input type="text" placeholder="Nova opção" required />
+      <button type="submit" class="btn btn-primary btn-small">+</button>
+    </form>
+    <ul class="admin-lista-itens" data-lista-opcao="{{ categoria }}">
+      {% for item in dados.itens %}
+      <li class="admin-lista-item" data-id="{{ item.id }}">
+        <span>{{ item.valor }}</span>
+        <button type="button" class="btn-excluir" data-excluir-opcao="{{ item.id }}">Excluir</button>
+      </li>
+      {% else %}
+      <li class="admin-lista-vazio">Nenhuma opção cadastrada.</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+</div>
+
+<h2 class="admin-secao-titulo">Lista de Peças (PN)</h2>
+<div class="card admin-peca-form-card">
+  <form id="form-nova-peca" class="form-linha" autocomplete="off">
+    <div class="field">
+      <label for="nova_peca_pn">PN MRHB</label>
+      <input type="text" id="nova_peca_pn" required />
+    </div>
+    <div class="field">
+      <label for="nova_peca_cliente">Cliente</label>
+      <select id="nova_peca_cliente" required>
+        <option value="" disabled selected>Selecione...</option>
+        {% for c in clientes %}<option>{{ c.nome }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="nova_peca_pn_cliente">PN Cliente</label>
+      <input type="text" id="nova_peca_pn_cliente" />
+    </div>
+    <div class="field">
+      <label for="nova_peca_responsavel">Responsável</label>
+      <input type="text" id="nova_peca_responsavel" />
+    </div>
+    <button type="submit" class="btn btn-primary">Adicionar Peça</button>
+  </form>
+</div>
+
+<div class="toolbar">
+  <button type="button" id="btn-limpar-filtros-pecas" class="btn btn-secondary btn-small">Limpar filtros</button>
+  <span id="contador-pecas" class="contador"></span>
+</div>
+
+<div class="table-wrap card">
+  <table>
+    <thead id="pecas-cabecalho"></thead>
+    <tbody id="tabela-pecas-corpo">
+      <tr><td colspan="5" class="loading">Carregando...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div id="filtro-popover-pecas" class="filtro-popover" hidden>
+  <div class="filtro-popover-busca">
+    <input type="text" id="filtro-popover-pecas-busca-input" placeholder="Buscar valor..." />
+  </div>
+  <label class="filtro-popover-item filtro-popover-todos">
+    <input type="checkbox" id="filtro-popover-pecas-todos" />
+    <span>(Selecionar tudo)</span>
+  </label>
+  <div id="filtro-popover-pecas-lista" class="filtro-popover-lista"></div>
+  <div class="filtro-popover-acoes">
+    <button type="button" id="filtro-popover-pecas-limpar" class="btn btn-secondary btn-small">Limpar</button>
+    <button type="button" id="filtro-popover-pecas-ok" class="btn btn-primary btn-small">OK</button>
+  </div>
+</div>
+
+<div id="modal-editar-peca" class="modal-overlay" hidden>
+  <div class="modal-card modal-card-pequeno">
+    <div class="modal-header">
+      <h2>Editar Peça</h2>
+      <button type="button" id="modal-peca-fechar" class="modal-close" aria-label="Fechar">&times;</button>
+    </div>
+    <div id="modal-peca-alert" class="alert" hidden></div>
+    <form id="form-editar-peca" class="form-grid modal-form-grid" autocomplete="off">
+      <input type="hidden" id="edit_peca_pn_original" />
+      <div class="field">
+        <label for="edit_peca_pn">PN MRHB</label>
+        <input type="text" id="edit_peca_pn" required />
+      </div>
+      <div class="field">
+        <label for="edit_peca_cliente">Cliente</label>
+        <select id="edit_peca_cliente" required>
+          <option value="" disabled>Selecione...</option>
+          {% for c in clientes %}<option>{{ c.nome }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label for="edit_peca_pn_cliente">PN Cliente</label>
+        <input type="text" id="edit_peca_pn_cliente" />
+      </div>
+      <div class="field">
+        <label for="edit_peca_responsavel">Responsável</label>
+        <input type="text" id="edit_peca_responsavel" />
+      </div>
+      <div class="form-actions">
+        <button type="button" id="modal-peca-cancelar" class="btn btn-secondary">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='admin.js') }}"></script>
+{% endblock %}

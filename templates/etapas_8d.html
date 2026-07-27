@@ -1,42 +1,57 @@
 {% extends "base.html" %}
-{% set etapas = ["Contenção", "Causa Raiz", "Ação Corretiva", "Poka Yoke", "LPA", "Validação", "Trab. Padronizado", "FMEA", "Plano de Controle", "Lições Aprendidas", "8D Fechado"] %}
 {% block title %}Etapas 8D · Sistema PDCA / 8D{% endblock %}
 {% block content %}
 <div class="page-header">
   <h1>Etapas 8D</h1>
-  <p class="subtitle">Prazo e data de realização de cada etapa, por reclamação. Preencha a Realização diretamente na tabela.</p>
+  <p class="subtitle">Clique numa reclamação para ver e preencher as 11 etapas do 8D. Clique no ▾ de uma coluna para filtrar.</p>
 </div>
 
 <div class="toolbar">
-  <input type="search" id="busca-etapas" placeholder="Buscar por ID MRHB, cliente, descrição..." />
+  <button type="button" id="btn-limpar-filtros-etapas" class="btn btn-secondary btn-small">Limpar filtros</button>
   <span id="contador-etapas" class="contador"></span>
 </div>
 
 <div class="table-wrap card">
-  <table class="tabela-etapas-8d">
-    <thead>
-      <tr>
-        <th rowspan="2">ID MRHB</th>
-        <th rowspan="2">Cliente</th>
-        <th rowspan="2">Descrição do Defeito</th>
-        <th rowspan="2">Data Abertura</th>
-        <th rowspan="2">Progresso</th>
-        <th rowspan="2">Status</th>
-        {% for etapa in etapas %}
-        <th colspan="2" class="etapa-grupo">{{ etapa }}</th>
-        {% endfor %}
-      </tr>
-      <tr>
-        {% for etapa in etapas %}
-        <th class="etapa-sub grupo-inicio">Prazo</th>
-        <th class="etapa-sub">Realização</th>
-        {% endfor %}
-      </tr>
-    </thead>
+  <table>
+    <thead id="tabela-etapas-cabecalho"></thead>
     <tbody id="tabela-etapas-corpo">
-      <tr><td colspan="28" class="loading">Carregando...</td></tr>
+      <tr><td colspan="7" class="loading">Carregando...</td></tr>
     </tbody>
   </table>
+</div>
+
+<div id="filtro-popover-etapas" class="filtro-popover" hidden>
+  <div class="filtro-popover-busca">
+    <input type="text" id="filtro-popover-etapas-busca-input" placeholder="Buscar valor..." />
+  </div>
+  <label class="filtro-popover-item filtro-popover-todos">
+    <input type="checkbox" id="filtro-popover-etapas-todos" />
+    <span>(Selecionar tudo)</span>
+  </label>
+  <div id="filtro-popover-etapas-lista" class="filtro-popover-lista"></div>
+  <div class="filtro-popover-acoes">
+    <button type="button" id="filtro-popover-etapas-limpar" class="btn btn-secondary btn-small">Limpar</button>
+    <button type="button" id="filtro-popover-etapas-ok" class="btn btn-primary btn-small">OK</button>
+  </div>
+</div>
+
+<div id="modal-etapas" class="modal-overlay" hidden>
+  <div class="modal-card">
+    <div class="modal-header">
+      <div>
+        <h2 id="modal-etapas-titulo">Etapas 8D</h2>
+        <p id="modal-etapas-subtitulo" class="subtitle-modal"></p>
+      </div>
+      <button type="button" id="modal-etapas-fechar" class="modal-close" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="modal-form-grid">
+      <div class="lista-etapas-cabecalho">
+        <span>Etapa</span>
+        <span>Realização</span>
+      </div>
+      <div id="tabela-etapas-detalhe-corpo" class="lista-etapas-detalhe"></div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 {% block scripts %}

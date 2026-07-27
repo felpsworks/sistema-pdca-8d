@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Login Administrador · Sistema PDCA / 8D{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Área do Administrador</h1>
+  <p class="subtitle">Acesso restrito. Informe a senha para gerenciar peças, clientes e as listas do formulário.</p>
+</div>
+
+<div class="login-wrap">
+  {% if erro %}
+  <div class="alert error">{{ erro }}</div>
+  {% endif %}
+
+  <form method="post" class="card form-grid" autocomplete="off">
+    <div class="field">
+      <label for="senha">Senha</label>
+      <input type="password" id="senha" name="senha" required autofocus />
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Entrar</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

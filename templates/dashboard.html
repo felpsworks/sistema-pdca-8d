@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Sistema PDCA / 8D{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Dashboard de Gestão — PDCA / 8D</h1>
+  <p class="subtitle">Visão geral das reclamações e do andamento dos 8Ds. Filtre por responsável, cliente ou período — todos os cartões e gráficos abaixo se ajustam juntos.</p>
+</div>
+
+<div class="dash-filtros">
+  <div class="dash-filtro-grupo">
+    <span class="dash-filtro-rotulo">Responsável:</span>
+    <div id="dash-chips-responsavel" class="chip-group dash-chip-group"></div>
+  </div>
+  <div class="dash-filtro-grupo">
+    <label for="dash-filtro-cliente" class="dash-filtro-rotulo">Cliente:</label>
+    <select id="dash-filtro-cliente">
+      <option value="">Todos os clientes</option>
+    </select>
+  </div>
+  <div class="dash-filtro-grupo">
+    <label for="dash-filtro-periodo" class="dash-filtro-rotulo">Período:</label>
+    <select id="dash-filtro-periodo">
+      <option value="todos">Todo o período</option>
+      <option value="mes">Este mês</option>
+      <option value="3meses">Últimos 3 meses</option>
+      <option value="6meses">Últimos 6 meses</option>
+      <option value="ano">Este ano</option>
+    </select>
+  </div>
+</div>
+
+<div id="dash-kpis" class="dash-kpis"></div>
+
+<div class="dash-grid">
+  <div class="card dash-card">
+    <h3 class="dash-card-titulo">Status Geral do 8D</h3>
+    <p class="dash-card-subtitulo">Reclamações Formais/Informais em aberto, no prazo ou atrasadas — e as já fechadas.</p>
+    <div id="dash-chart-status" class="dash-chart-area"></div>
+  </div>
+  <div class="card dash-card">
+    <h3 class="dash-card-titulo">Reclamações por Mês</h3>
+    <p class="dash-card-subtitulo">Volume total de reclamações abertas em cada mês.</p>
+    <div id="dash-chart-mes" class="dash-chart-area"></div>
+  </div>
+  <div class="card dash-card">
+    <h3 class="dash-card-titulo">Distribuição por Tipo de Reclamação</h3>
+    <p class="dash-card-subtitulo">Formal e Informal exigem 8D completo; os demais não.</p>
+    <div id="dash-chart-tipo" class="dash-chart-area"></div>
+  </div>
+  <div class="card dash-card">
+    <h3 class="dash-card-titulo">Reclamações por Cliente</h3>
+    <p class="dash-card-subtitulo">Clientes com mais reclamações no período filtrado.</p>
+    <div id="dash-chart-cliente" class="dash-chart-area"></div>
+  </div>
+  <div class="card dash-card dash-card-larga">
+    <h3 class="dash-card-titulo">Gargalo por Etapa do 8D</h3>
+    <p class="dash-card-subtitulo">Onde as reclamações Formais/Informais em aberto estão paradas agora — e quais já estão atrasadas naquela etapa.</p>
+    <div id="dash-chart-etapas" class="dash-chart-area dash-chart-area-alta"></div>
+  </div>
+</div>
+
+<div id="dash-tooltip" class="dash-tooltip" hidden></div>
+
+<div id="modal-dash-detalhe" class="modal-overlay" hidden>
+  <div class="modal-card modal-card-larga">
+    <div class="modal-header">
+      <div>
+        <h2 id="modal-dash-titulo">Reclamações</h2>
+        <p id="modal-dash-subtitulo" class="subtitle-modal"></p>
+      </div>
+      <button type="button" id="modal-dash-fechar" class="modal-close" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="table-wrap modal-dash-tabela-wrap">
+      <table>
+        <thead id="modal-dash-cabecalho"></thead>
+        <tbody id="modal-dash-corpo">
+          <tr><td class="loading">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+{% endblock %}

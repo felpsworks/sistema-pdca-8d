@@ -1,10 +1,48 @@
 const form = document.getElementById("form-reclamacao");
 const pnInput = document.getElementById("pn_mrhb");
-const pnStatus = document.getElementById("pn_status");
+const pnConfirmacao = document.getElementById("pn_confirmacao");
+const pnConfirmacaoIcone = document.getElementById("pn_confirmacao_icone");
+const pnConfirmacaoTitulo = document.getElementById("pn_confirmacao_titulo");
+const pnConfirmacaoDetalhe = document.getElementById("pn_confirmacao_detalhe");
 const clienteInput = document.getElementById("cliente");
 const pnClienteInput = document.getElementById("pn_cliente");
 const responsavelInput = document.getElementById("responsavel_cliente");
 const alertBox = document.getElementById("alert");
+
+function mostrarConfirmacaoPn(estado, titulo, detalhe) {
+  pnConfirmacao.hidden = false;
+  pnConfirmacao.className = `pn-confirmacao ${estado}`;
+  pnConfirmacaoIcone.textContent = estado === "ok" ? "✓" : "!";
+  pnConfirmacaoTitulo.textContent = titulo;
+  pnConfirmacaoDetalhe.textContent = detalhe || "";
+}
+
+function esconderConfirmacaoPn() {
+  pnConfirmacao.hidden = true;
+}
+
+// Revelação progressiva por seção: "Classificação" só aparece depois que
+// "Descrição do Defeito" (última pergunta de "Identificação") é preenchida;
+// "Detalhes da Medição" só aparece depois de "Tipo de Reclamação" (última
+// pergunta de "Classificação"). Reduz a sensação de formulário longo.
+function revelarSecao(classe) {
+  document.querySelectorAll(`.${classe}`).forEach((el) => { el.hidden = false; });
+}
+
+function esconderSecoesReveladas() {
+  document.querySelectorAll(".form-secao-2, .form-secao-3").forEach((el) => { el.hidden = true; });
+}
+
+const CAMPO_QUE_REVELA_SECAO = {
+  descricao_defeito: "form-secao-2",
+  tipo_reclamacao: "form-secao-3",
+};
+
+// Reforço para quem sai do campo sem apertar Enter (clique/Tab): o avanço por
+// Enter já revela a próxima seção via focarProximoCampo, isso cobre o resto.
+document.getElementById("descricao_defeito").addEventListener("blur", (ev) => {
+  if (ev.target.value.trim()) revelarSecao("form-secao-2");
+});
 
 // Usa data local (não UTC) para não "pular" um dia à noite em fusos negativos
 function hojeISO() {
@@ -23,7 +61,7 @@ async function buscarPeca() {
   responsavelInput.value = "";
 
   if (!pn) {
-    pnStatus.textContent = "";
+    esconderConfirmacaoPn();
     return;
   }
   try {
@@ -33,15 +71,12 @@ async function buscarPeca() {
       clienteInput.value = dados.cliente || "";
       pnClienteInput.value = dados.pn_cliente || "";
       responsavelInput.value = dados.responsavel || "";
-      pnStatus.textContent = `Cliente: ${dados.cliente}${dados.responsavel ? " · Responsável: " + dados.responsavel : ""}`;
-      pnStatus.className = "hint ok";
+      mostrarConfirmacaoPn("ok", dados.cliente, dados.responsavel ? `Responsável: ${dados.responsavel}` : "");
     } else {
-      pnStatus.textContent = "PN não encontrado na Lista PN — cadastre a peça antes de continuar.";
-      pnStatus.className = "hint miss";
+      mostrarConfirmacaoPn("miss", "PN não encontrado", "Cadastre a peça na área Administrador antes de continuar.");
     }
   } catch (err) {
-    pnStatus.textContent = "Não foi possível consultar a lista de peças.";
-    pnStatus.className = "hint miss";
+    mostrarConfirmacaoPn("miss", "Erro de conexão", "Não foi possível consultar a lista de peças.");
   }
 }
 
@@ -91,7 +126,8 @@ form.addEventListener("submit", async (ev) => {
     mostrarAlerta(`Reclamação cadastrada com sucesso! ID MRHB: ${resposta.id_mrhb}`, "success");
     form.reset();
     document.getElementById("data_abertura").value = hojeISO();
-    pnStatus.textContent = "";
+    esconderConfirmacaoPn();
+    esconderSecoesReveladas();
     destacarTipoReclamacao(tipoReclamacaoSelect);
     atualizarAvisoSemNotificacao();
   } catch (err) {
@@ -102,21 +138,27 @@ form.addEventListener("submit", async (ev) => {
 document.getElementById("btn-limpar").addEventListener("click", () => {
   form.reset();
   document.getElementById("data_abertura").valueAsDate = new Date();
-  pnStatus.textContent = "";
+  esconderConfirmacaoPn();
+  esconderSecoesReveladas();
   alertBox.hidden = true;
   destacarTipoReclamacao(tipoReclamacaoSelect);
   atualizarAvisoSemNotificacao();
 });
 
-// Destaque por cor do Tipo de Reclamação: Formal = vermelho, Informal = amarelo
+// Destaque por cor do Tipo de Reclamação: Formal = vermelho, Informal = amarelo.
+// A mesma cor sobe para uma borda no topo do formulário inteiro, dando uma
+// noção de severidade do caso à primeira vista, sem precisar rolar até o campo.
 const tipoReclamacaoSelect = document.getElementById("tipo_reclamacao");
 
 function destacarTipoReclamacao(select) {
   select.classList.remove("tipo-reclamacao-formal", "tipo-reclamacao-informal");
+  form.classList.remove("severidade-formal", "severidade-informal");
   if (select.value === "Formal") {
     select.classList.add("tipo-reclamacao-formal");
+    form.classList.add("severidade-formal");
   } else if (select.value === "Informal") {
     select.classList.add("tipo-reclamacao-informal");
+    form.classList.add("severidade-informal");
   }
 }
 
@@ -143,6 +185,8 @@ function elementoDoCampo(nome) {
 }
 
 function focarProximoCampo(nomeAtual) {
+  if (CAMPO_QUE_REVELA_SECAO[nomeAtual]) revelarSecao(CAMPO_QUE_REVELA_SECAO[nomeAtual]);
+
   const indice = ORDEM_CAMPOS.indexOf(nomeAtual);
   const proximoNome = ORDEM_CAMPOS[indice + 1];
   if (proximoNome) {

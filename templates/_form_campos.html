@@ -1,4 +1,6 @@
-{% macro campos_reclamacao(p="") %}
+{% macro campos_reclamacao(p="", opcoes={}) %}
+<div class="form-secao-titulo field-wide">Identificação da Reclamação</div>
+
 <div class="field">
   <label for="{{ p }}numero_notificacao">Nº Notificação <span class="req">*</span></label>
   <input type="text" id="{{ p }}numero_notificacao" name="numero_notificacao" required />
@@ -13,10 +15,18 @@
   <input type="date" id="{{ p }}data_abertura" name="data_abertura" required />
 </div>
 
-<div class="field">
+<div class="field field-wide">
   <label for="{{ p }}pn_mrhb">PN MRHB <span class="req">*</span></label>
   <input type="text" id="{{ p }}pn_mrhb" name="pn_mrhb" placeholder="Digite o PN e saia do campo" required />
-  {% if not p %}<span id="pn_status" class="hint"></span>{% endif %}
+  {% if not p %}
+  <div id="pn_confirmacao" class="pn-confirmacao" hidden>
+    <span id="pn_confirmacao_icone" class="pn-confirmacao-icone"></span>
+    <div class="pn-confirmacao-texto">
+      <strong id="pn_confirmacao_titulo"></strong>
+      <span id="pn_confirmacao_detalhe"></span>
+    </div>
+  </div>
+  {% endif %}
 </div>
 
 {% if p %}
@@ -30,7 +40,7 @@
   <input type="text" id="{{ p }}cliente" name="cliente" required />
 </div>
 
-<div class="field">
+<div class="field field-wide">
   <label for="{{ p }}responsavel_cliente">Responsável Cliente</label>
   <input type="text" id="{{ p }}responsavel_cliente" name="responsavel_cliente" />
 </div>
@@ -45,10 +55,12 @@
   <textarea id="{{ p }}descricao_defeito" name="descricao_defeito" rows="3" required></textarea>
 </div>
 
-<div class="field">
+<div class="form-secao-titulo field-wide form-secao-2" {{ 'hidden' if not p else '' }}>Classificação</div>
+
+<div class="field form-secao-2" {{ 'hidden' if not p else '' }}>
   <label>Tipo PDCA <span class="req">*</span></label>
   <div class="chip-group">
-    {% for opcao in ["Reclamação Externa", "Reclamação Interna", "SESMT"] %}
+    {% for opcao in opcoes.get('tipo_pdca', []) %}
     <label class="chip">
       <input type="radio" name="tipo_pdca" value="{{ opcao }}" required />
       <span>{{ opcao }}</span>
@@ -57,10 +69,10 @@
   </div>
 </div>
 
-<div class="field">
+<div class="field form-secao-2" {{ 'hidden' if not p else '' }}>
   <label>Área Responsável 8D <span class="req">*</span></label>
   <div class="chip-group">
-    {% for opcao in ["Usinagem", "Injeção", "Us/In"] %}
+    {% for opcao in opcoes.get('area_responsavel_8d', []) %}
     <label class="chip">
       <input type="radio" name="area_responsavel_8d" value="{{ opcao }}" required />
       <span>{{ opcao }}</span>
@@ -69,10 +81,10 @@
   </div>
 </div>
 
-<div class="field">
+<div class="field form-secao-2" {{ 'hidden' if not p else '' }}>
   <label>Tipo Problema <span class="req">*</span></label>
   <div class="chip-group">
-    {% for opcao in ["Visual", "Dimensional", "Logistico"] %}
+    {% for opcao in opcoes.get('tipo_problema', []) %}
     <label class="chip">
       <input type="radio" name="tipo_problema" value="{{ opcao }}" required />
       <span>{{ opcao }}</span>
@@ -81,43 +93,33 @@
   </div>
 </div>
 
-<div class="field">
+<div class="field form-secao-2" {{ 'hidden' if not p else '' }}>
   <label for="{{ p }}tipo_reclamacao">Tipo de Reclamação <span class="req">*</span></label>
   <select id="{{ p }}tipo_reclamacao" name="tipo_reclamacao" required>
     <option value="" {{ 'disabled selected' if not p else '' }}>Selecione...</option>
-    <option>Formal</option>
-    <option>Informal</option>
-    <option>Informativo</option>
-    <option>Disputa</option>
-    <option>Alerta</option>
-    <option>Logística</option>
+    {% for opcao in opcoes.get('tipo_reclamacao', []) %}<option>{{ opcao }}</option>{% endfor %}
   </select>
 </div>
 
-<div class="field">
+<div class="form-secao-titulo field-wide form-secao-3" {{ 'hidden' if not p else '' }}>Detalhes da Medição</div>
+
+<div class="field form-secao-3" {{ 'hidden' if not p else '' }}>
   <label for="{{ p }}mq_in">MQ IN <span class="req">*</span></label>
   <select id="{{ p }}mq_in" name="mq_in" required>
     <option value="" {{ 'disabled selected' if not p else '' }}>Selecione...</option>
-    <option>#50-1</option>
-    <option>#70-1</option>
-    <option>#70-2</option>
-    <option>#122-2</option>
-    <option>#180-1</option>
-    <option>#250-1</option>
-    <option>N/A</option>
+    {% for opcao in opcoes.get('mq_in', []) %}<option>{{ opcao }}</option>{% endfor %}
   </select>
 </div>
 
-<div class="field">
+<div class="field form-secao-3" {{ 'hidden' if not p else '' }}>
   <label for="{{ p }}mq_us">MQ US <span class="req">*</span></label>
   <select id="{{ p }}mq_us" name="mq_us" required>
     <option value="" {{ 'disabled selected' if not p else '' }}>Selecione...</option>
-    <option>N/A</option>
-    {% for n in range(26, 60) %}{% if n not in [28, 29, 31, 32, 33, 34] %}<option>#{{ n }}</option>{% endif %}{% endfor %}
+    {% for opcao in opcoes.get('mq_us', []) %}<option>{{ opcao }}</option>{% endfor %}
   </select>
 </div>
 
-<div class="field">
+<div class="field field-wide form-secao-3" {{ 'hidden' if not p else '' }}>
   <label for="{{ p }}qtd_reclamada">Qtd. Reclamada <span class="req">*</span></label>
   <input type="text" id="{{ p }}qtd_reclamada" name="qtd_reclamada" inputmode="numeric" required />
 </div>
